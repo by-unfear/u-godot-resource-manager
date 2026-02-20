@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { X, Plus, Save, FileCode, Trash2, ChevronDown, ChevronRight, Settings } from "lucide-react";
 import { useStore } from "../store";
-import { ALL_SCHEMAS, SCHEMA_MAP } from "../lib/schemas";
-import { X, Plus, Save, FileCode, Trash2 } from "lucide-react";
+import { saveSchema, generateGDScript, loadSchemas } from "../lib/fs";
+import { SCHEMA_CATEGORIES } from "../lib/schemas";
 import type { Schema, SchemaField } from "../types";
 
 // Tipos de campo disponíveis para o usuário
@@ -9,8 +10,6 @@ const FIELD_TYPES = [
   "string", "int", "float", "bool", "color", "vector3",
   "file", "image", "array_string", "relation", "array_relation"
 ];
-
-import { saveSchema, generateGDScript, loadSchemas } from "../lib/fs";
 
 export function SchemaEditor() {
   const { setEditingSchema, projectPath, schemas, setSchemas } = useStore();
@@ -35,7 +34,7 @@ export function SchemaEditor() {
       label: "New Resource",
       emoji: "📦",
       color: "#ffffff",
-      folder: "data/new_type",
+      folder: "", // Default to resources
       convention: "snake_case",
       fields: []
     };
@@ -51,6 +50,11 @@ export function SchemaEditor() {
       // Recarrega os schemas para atualizar a lista
       const loaded = await loadSchemas(projectPath);
       setSchemas(loaded);
+      
+      // Atualiza o schema selecionado se necessário
+      if (selectedSchemaType === "new") {
+          setSelectedSchemaType(draft.type);
+      }
       
       alert(`Schema salvo com sucesso!\n${path}`);
     } catch (e) {
@@ -72,86 +76,147 @@ export function SchemaEditor() {
   };
 
   return (
-    <div className="flex w-full h-screen bg-bg-base text-text-primary">
-      {/* Sidebar: Lista de tipos */}
-      <div className="w-64 border-r border-bg-border flex flex-col">
-        <div className="p-4 border-b border-bg-border flex justify-between items-center">
-          <h2 className="font-bold text-sm">Schema Editor</h2>
-          <button onClick={() => setEditingSchema(false)} title="Fechar Editor">
-            <X size={16} />
-          </button>
+    <div className="flex h-screen w-screen overflow-hidden bg-[#0d0d0f]">
+      {/* Sidebar: Lista de tipos (Estilo Sidebar.tsx) */}
+      <aside className="flex flex-col w-56 h-screen border-r border-bg-border bg-bg-panel shrink-0">
+        {/* Header Identico ao Sidebar.tsx */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-bg-border shrink-0">
+          <h1 className="font-bold text-sm tracking-wide text-text-muted">SCHEMAS</h1>
+          <div className="flex items-center gap-1">
+            <button 
+                onClick={() => setEditingSchema(false)} 
+                className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
+                title="Fechar Editor"
+            >
+                <X size={16} />
+            </button>
+          </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          <button
-            onClick={handleNewSchema}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono rounded hover:bg-bg-hover text-green-400"
-          >
-            <Plus size={14} /> NOVO TIPO
-          </button>
-          
-          <hr className="border-bg-border my-2" />
-          
-          {schemas.map(s => (
-            <button
-              key={s.type}
-              onClick={() => handleSelectSchema(s.type)}
-              className={`w-full text-left px-3 py-1.5 text-xs font-mono rounded truncate
-                ${selectedSchemaType === s.type ? "bg-bg-active text-text-primary" : "text-text-muted hover:bg-bg-hover"}
-              `}
-            >
-              {s.emoji} {s.type}
-            </button>
-          ))}
-        </div>
-      </div>
+        <div className="flex-1 overflow-y-auto py-2 space-y-1">
+            {/* Botão Novo Tipo mais limpo */}
+            <div className="px-2 mb-2">
+                <button
+                    onClick={handleNewSchema}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded hover:bg-bg-hover text-green-400 border border-transparent hover:border-bg-border transition-all
+                        ${selectedSchemaType === "new" ? "bg-bg-active border-bg-border" : ""}`}
+                >
+                    <Plus size={14} /> Novo Tipo
+                </button>
+            </div>
 
-      {/* Editor Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Listagem de Schemas (Estilo resource list) */}
+            {Object.entries(schemas.reduce((acc, schema) => {
+                let category = "Custom";
+                for (const cat of SCHEMA_CATEGORIES) {
+                    if (cat.types.includes(schema.type)) {
+                        category = cat.label;
+                        break;
+                    }
+                }
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(schema);
+                return acc;
+            }, {} as Record<string, Schema[]>)).map(([label, list]) => (
+                <div key={label} className="mb-2">
+                    <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted/70">
+                        {label}
+                    </p>
+                    <div className="space-y-0.5">
+                        {list.map(s => {
+                            const active = selectedSchemaType === s.type;
+                            return (
+                                <button
+                                    key={s.type}
+                                    onClick={() => handleSelectSchema(s.type)}
+                                    className={`w-full flex items-center gap-2.5 px-4 py-1.5 text-xs font-mono transition-all
+                                        ${active
+                                        ? "bg-bg-active text-text-primary border-r-2 border-r-primary"
+                                        : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                                        }`}
+                                    style={{ borderRightColor: active ? s.color : "transparent" }}
+                                >
+                                    <span 
+                                        className="w-2 h-2 rounded-full shrink-0 opacity-80" 
+                                        style={{ backgroundColor: s.color }} 
+                                    />
+                                    <span className="truncate font-medium">{s.type}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+        </div>
+      </aside>
+
+      {/* Editor Area (Estilo ResourceForm.tsx) */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-bg-base">
         {!draft ? (
           <div className="flex-1 flex items-center justify-center text-text-muted">
-            Selecione um tipo para editar ou crie um novo.
+            <div className="text-center space-y-2">
+                <Settings size={48} className="mx-auto text-bg-border" />
+                <p>Selecione um tipo para editar ou crie um novo.</p>
+            </div>
           </div>
         ) : (
           <>
-            {/* Header / Actions */}
-            <div className="p-4 border-b border-bg-border flex justify-between items-center bg-bg-panel">
+            {/* Top Bar */}
+            <div 
+                className="flex items-center justify-between px-6 py-3 border-b border-bg-border bg-bg-panel shrink-0"
+                style={{ borderTopColor: draft.color, borderTopWidth: 2 }}
+            >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{draft.emoji}</span>
                 <div>
-                  <h1 className="font-bold text-lg">{draft.type}</h1>
-                  <p className="text-xs text-text-muted">{draft.label}</p>
+                  <h1 className="font-bold text-lg leading-none">{draft.type}</h1>
+                  <p className="text-xs text-text-muted mt-0.5 font-mono">{draft.label}</p>
                 </div>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleGenerateGDScript}
-                  className="px-3 py-1.5 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded text-xs hover:bg-blue-600/30 flex items-center gap-2"
+                  className="px-3 py-1.5 bg-blue-600/10 text-blue-400 border border-blue-600/20 rounded text-xs hover:bg-blue-600/20 flex items-center gap-2 transition-all"
                 >
-                  <FileCode size={14} /> Gerar .gd
+                  <FileCode size={14} /> Gerar Script
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-3 py-1.5 bg-green-600 text-white rounded text-xs hover:bg-green-700 font-bold flex items-center gap-2"
+                  className="px-3 py-1.5 bg-green-600 text-white rounded text-xs hover:bg-green-700 font-bold flex items-center gap-2 transition-all shadow-sm"
                 >
                   <Save size={14} /> Salvar Schema
                 </button>
               </div>
             </div>
 
-            {/* Form */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            {/* Form Body */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
               
-              {/* Basic Info */}
+              {/* Metadata Section */}
               <section className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted border-b border-bg-border pb-1">
-                  Metadados
+                <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted border-b border-bg-border pb-2">
+                  Configurações do Tipo
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput label="Class Name (Type)" value={draft.type} onChange={v => setDraft({...draft, type: v})} />
-                  <FormInput label="Label (UI)" value={draft.label} onChange={v => setDraft({...draft, label: v})} />
-                  <FormInput label="Folder" value={draft.folder} onChange={v => setDraft({...draft, folder: v})} />
-                  <div className="flex gap-4">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <FormInput 
+                    label="Class Name (Type)" 
+                    value={draft.type} 
+                    onChange={v => setDraft({...draft, type: v})} 
+                    placeholder="Ex: MyItem"
+                  />
+                  <FormInput 
+                    label="Label (UI)" 
+                    value={draft.label} 
+                    onChange={v => setDraft({...draft, label: v})} 
+                    placeholder="Ex: My Item"
+                  />
+                  <FormInput 
+                    label="Resource Folder (ex: items/weapons)" 
+                    value={draft.folder} 
+                    onChange={v => setDraft({...draft, folder: v})} 
+                    placeholder="Deixe vazio para usar 'resources/'"
+                  />
+                  <div className="flex gap-4 items-end">
                     <div className="w-20">
                       <EmojiInput value={draft.emoji} onChange={v => setDraft({...draft, emoji: v})} />
                     </div>
@@ -162,18 +227,18 @@ export function SchemaEditor() {
                 </div>
               </section>
 
-              {/* Fields Editor */}
+              {/* Fields Section */}
               <section className="space-y-4">
-                <div className="flex justify-between items-end border-b border-bg-border pb-1">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted">
-                    Campos (Fields)
+                <div className="flex justify-between items-end border-b border-bg-border pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted">
+                    Propriedades (Campos)
                   </h3>
                   <button
                     onClick={() => setDraft({
                       ...draft,
-                      fields: [...draft.fields, { key: "new_field", label: "New Field", type: "string" }]
+                      fields: [...draft.fields, { key: "new_var", label: "New Variable", type: "string" }]
                     })}
-                    className="text-xs text-green-400 hover:text-green-300 flex items-center gap-1"
+                    className="px-2 py-1 bg-bg-active border border-bg-border rounded text-xs text-green-400 hover:text-green-300 hover:border-green-400/50 flex items-center gap-1 transition-all"
                   >
                     <Plus size={12} /> Add Field
                   </button>
@@ -181,14 +246,15 @@ export function SchemaEditor() {
 
                 <div className="space-y-2">
                   {draft.fields.map((field, idx) => (
-                    <div key={idx} className="flex items-start gap-2 p-3 bg-bg-panel rounded border border-bg-border group">
-                      <div className="flex-1 grid grid-cols-12 gap-2">
+                    <div key={idx} className="flex items-start gap-2 p-3 bg-bg-panel rounded border border-bg-border group hover:border-text-muted/30 transition-colors">
+                      <div className="flex-1 grid grid-cols-12 gap-3">
                         {/* Key */}
                         <div className="col-span-3">
-                          <label className="text-[10px] text-text-muted block mb-0.5">Key (Var Name)</label>
+                          <label className="text-[10px] text-text-muted block mb-0.5 font-mono">Var Name</label>
                           <input
-                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1 text-xs font-mono"
+                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1.5 text-xs font-mono focus:border-text-secondary outline-none"
                             value={field.key}
+                            placeholder="my_var"
                             onChange={(e) => {
                               const newFields = [...draft.fields];
                               newFields[idx] = { ...field, key: e.target.value };
@@ -199,9 +265,9 @@ export function SchemaEditor() {
 
                         {/* Type */}
                         <div className="col-span-3">
-                          <label className="text-[10px] text-text-muted block mb-0.5">Type</label>
+                          <label className="text-[10px] text-text-muted block mb-0.5 font-mono">Type</label>
                           <select
-                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1 text-xs font-mono"
+                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1.5 text-xs font-mono focus:border-text-secondary outline-none"
                             value={field.type}
                             onChange={(e) => {
                               const newFields = [...draft.fields];
@@ -215,10 +281,11 @@ export function SchemaEditor() {
 
                         {/* Label */}
                         <div className="col-span-3">
-                          <label className="text-[10px] text-text-muted block mb-0.5">Label (UI)</label>
+                          <label className="text-[10px] text-text-muted block mb-0.5 font-mono">Display Label</label>
                           <input
-                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1 text-xs"
+                            className="w-full bg-bg-base border border-bg-border rounded px-2 py-1.5 text-xs focus:border-text-secondary outline-none"
                             value={field.label}
+                            placeholder="UI Label"
                             onChange={(e) => {
                               const newFields = [...draft.fields];
                               newFields[idx] = { ...field, label: e.target.value };
@@ -227,11 +294,11 @@ export function SchemaEditor() {
                           />
                         </div>
 
-                        {/* Extra Options (simplified) */}
+                        {/* Group */}
                         <div className="col-span-3">
-                          <label className="text-[10px] text-text-muted block mb-0.5">Category/Group</label>
+                          <label className="text-[10px] text-text-muted block mb-0.5 font-mono">Category</label>
                           <input
-                             className="w-full bg-bg-base border border-bg-border rounded px-2 py-1 text-xs"
+                             className="w-full bg-bg-base border border-bg-border rounded px-2 py-1.5 text-xs focus:border-text-secondary outline-none"
                              value={field.group ?? ""}
                              placeholder="(Optional)"
                              onChange={(e) => {
@@ -248,8 +315,8 @@ export function SchemaEditor() {
                           const newFields = draft.fields.filter((_, i) => i !== idx);
                           setDraft({ ...draft, fields: newFields });
                         }}
-                        className="mt-5 text-text-muted hover:text-red-400 p-1"
-                        title="Remover Campo"
+                        className="mt-5 text-text-muted hover:text-red-400 p-1.5 rounded hover:bg-bg-base transition-colors"
+                        title="Remove Field"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -257,9 +324,10 @@ export function SchemaEditor() {
                   ))}
 
                   {draft.fields.length === 0 && (
-                    <p className="text-center text-xs text-text-muted py-8 border border-dashed border-bg-border rounded">
-                      Nenhum campo definido. Adicione variáveis ao seu recurso.
-                    </p>
+                    <div className="text-center py-10 border-2 border-dashed border-bg-border rounded-lg bg-bg-panel/50">
+                      <p className="text-sm text-text-muted">Nenhum campo definido.</p>
+                      <p className="text-xs text-text-secondary mt-1">Adicione variáveis como Vida, Dano, Textura, etc.</p>
+                    </div>
                   )}
                 </div>
               </section>
@@ -273,7 +341,7 @@ export function SchemaEditor() {
 }
 
 
-function FormInput({ label, value, onChange, type = "text" }: { label: string, value: string, onChange: (v: string) => void, type?: string }) {
+function FormInput({ label, value, onChange, type = "text", placeholder }: { label: string, value: string, onChange: (v: string) => void, type?: string, placeholder?: string }) {
   return (
     <div>
       <label className="block text-xs text-text-secondary mb-1 font-mono">{label}</label>
@@ -281,7 +349,8 @@ function FormInput({ label, value, onChange, type = "text" }: { label: string, v
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-bg-panel border border-bg-border rounded px-3 py-1.5 text-sm focus:border-text-muted outline-none"
+        placeholder={placeholder}
+        className="w-full bg-bg-base border border-bg-border rounded px-3 py-2 text-sm focus:border-text-muted outline-none transition-colors"
       />
     </div>
   );
@@ -303,7 +372,7 @@ function EmojiInput({ value, onChange }: { value: string, onChange: (v: string) 
       <label className="block text-xs text-text-secondary mb-1 font-mono">Emoji</label>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full bg-bg-panel border border-bg-border rounded px-3 py-1.5 text-xl flex items-center justify-center hover:bg-bg-hover"
+        className="w-full bg-bg-base border border-bg-border rounded px-3 py-1.5 text-xl flex items-center justify-center hover:bg-bg-hover transition-colors h-[38px]"
       >
         {value || "❓"}
       </button>

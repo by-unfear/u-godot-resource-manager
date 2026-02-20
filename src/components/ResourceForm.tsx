@@ -8,13 +8,13 @@ import { FieldRenderer } from "./fields/FieldRenderer";
 import type { ResourceRecord } from "../types";
 
 export function ResourceForm() {
-  const { selectedFile, selectedType, upsertResource, projectPath } = useStore();
+  const { selectedFile, selectedType, upsertResource, projectPath, schemas } = useStore();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportPath, setExportPath] = useState("");
 
-  const schema = selectedType ? getSchema(selectedType) : null;
+  const schema = schemas.find(s => s.type === selectedType) ?? null;
   const methods = useForm<ResourceRecord>();
   const { handleSubmit, reset, watch } = methods;
 
@@ -26,7 +26,9 @@ export function ResourceForm() {
       // Build default export path
       if (projectPath && schema) {
         const name = rec._file || stripExt(basename(selectedFile));
-        setExportPath(`${projectPath}/${schema.folder}/${name}.tres`);
+        const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
+        const fullPath = `${projectPath}/${folder}/${name}.tres`.replace(/\\/g, "/");
+        setExportPath(fullPath);
       }
     });
   }, [selectedFile]);

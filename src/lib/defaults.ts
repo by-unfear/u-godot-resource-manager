@@ -34,10 +34,18 @@ export function buildDefault(
   fileName: string,
   projectPath: string
 ): ResourceRecord {
+  // Determine target folder relative to project root
+  // If schema.folder is set, use it. Else default to "resources".
+  // Clean up leading/trailing slashes.
+  const relativeFolder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
+  
+  // JSON Path: .schemas/data/[relativeFolder]/[fileName].json
+  const jsonPath = `${projectPath}/.schemas/data/${relativeFolder}/${fileName}.json`.replace(/\\/g, "/");
+
   const record: ResourceRecord = {
     _type: schema.type,
     _file: fileName,
-    _path: `${projectPath}/${schema.folder}/${fileName}.json`,
+    _path: jsonPath,
   };
   for (const field of schema.fields) {
     record[field.key] = fieldDefault(field);

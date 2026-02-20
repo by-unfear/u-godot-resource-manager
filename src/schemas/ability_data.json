@@ -1,1 +1,171 @@
-{"type":"AbilityData","label":"Ability","emoji":"✨","color":"#a78bfa","folder":"resources/abilities","convention":"nome-ability.json","fields":[{"key":"ability_id","label":"Ability ID","type":"string"},{"key":"ability_name","label":"Name","type":"string"},{"key":"description","label":"Description","type":"text"},{"key":"icon","label":"Icon","type":"image"},{"key":"ability_type","label":"Type","type":"enum","options":["INSTANT","CAST","CHANNEL"],"group":"Behavior"},{"key":"target_type","label":"Target","type":"enum","options":["SELF","ENEMY","ALLY","GROUND","DIRECTION"],"group":"Behavior"},{"key":"cast_time","label":"Cast Time","type":"float","default":0.0,"group":"Behavior"},{"key":"channel_duration","label":"Channel Duration","type":"float","default":0.0,"group":"Behavior"},{"key":"channel_tick_interval","label":"Channel Tick Interval","type":"float","default":0.5,"group":"Behavior"},{"key":"cooldown","label":"Cooldown","type":"float","default":1.0,"group":"Costs"},{"key":"energy_cost","label":"Energy Cost","type":"float","default":0.0,"group":"Costs"},{"key":"mana_cost","label":"Mana Cost","type":"float","default":0.0,"group":"Costs"},{"key":"charges","label":"Charges (0=unlimited)","type":"int","default":0,"group":"Costs"},{"key":"max_range","label":"Max Range","type":"float","default":100.0,"group":"Targeting"},{"key":"aoe_radius","label":"AOE Radius","type":"float","default":0.0,"group":"Targeting"},{"key":"requires_line_of_sight","label":"Requires LOS","type":"bool","default":true,"group":"Targeting"},{"key":"tags","label":"Tags","type":"array_string","group":"Tags"},{"key":"cast_vfx_id","label":"Cast VFX ID","type":"string","group":"Visual/Audio"},{"key":"impact_vfx_id","label":"Impact VFX ID","type":"string","group":"Visual/Audio"},{"key":"vfx_offset","label":"VFX Offset","type":"vector3","default":{"x":0,"y":0,"z":0},"group":"Visual/Audio"},{"key":"cast_sfx_id","label":"Cast SFX ID","type":"string","group":"Visual/Audio"},{"key":"impact_sfx_id","label":"Impact SFX ID","type":"string","group":"Visual/Audio"},{"key":"animation_name","label":"Animation Name","type":"string","group":"Visual/Audio"}]}
+{
+  "type": "AbilityData",
+  "label": "Ability",
+  "emoji": "✨",
+  "color": "#a78bfa",
+  "folder": "resources/abilities",
+  "convention": "nome-ability.json",
+  "fields": [
+    {
+      "key": "ability_id",
+      "label": "Ability ID",
+      "type": "string"
+    },
+    {
+      "key": "ability_name",
+      "label": "Name",
+      "type": "string"
+    },
+    {
+      "key": "description",
+      "label": "Description",
+      "type": "text"
+    },
+    {
+      "key": "icon",
+      "label": "Icon",
+      "type": "image"
+    },
+    {
+      "key": "ability_type",
+      "label": "Type",
+      "type": "enum",
+      "options": [
+        "INSTANT",
+        "CAST",
+        "CHANNEL"
+      ],
+      "group": "Behavior"
+    },
+    {
+      "key": "target_type",
+      "label": "Target",
+      "type": "enum",
+      "options": [
+        "SELF",
+        "ENEMY",
+        "ALLY",
+        "GROUND",
+        "DIRECTION"
+      ],
+      "group": "Behavior"
+    },
+    {
+      "key": "cast_time",
+      "label": "Cast Time",
+      "type": "float",
+      "default": 0,
+      "group": "Behavior"
+    },
+    {
+      "key": "channel_duration",
+      "label": "Channel Duration",
+      "type": "float",
+      "default": 0,
+      "group": "Behavior"
+    },
+    {
+      "key": "channel_tick_interval",
+      "label": "Channel Tick Interval",
+      "type": "float",
+      "default": 0.5,
+      "group": "Behavior"
+    },
+    {
+      "key": "cooldown",
+      "label": "Cooldown",
+      "type": "float",
+      "default": 1,
+      "group": "Costs"
+    },
+    {
+      "key": "energy_cost",
+      "label": "Energy Cost",
+      "type": "float",
+      "default": 0,
+      "group": "Costs"
+    },
+    {
+      "key": "mana_cost",
+      "label": "Mana Cost",
+      "type": "float",
+      "default": 0,
+      "group": "Costs"
+    },
+    {
+      "key": "charges",
+      "label": "Charges (0=unlimited)",
+      "type": "int",
+      "default": 0,
+      "group": "Costs"
+    },
+    {
+      "key": "max_range",
+      "label": "Max Range",
+      "type": "float",
+      "default": 100,
+      "group": "Targeting"
+    },
+    {
+      "key": "aoe_radius",
+      "label": "AOE Radius",
+      "type": "float",
+      "default": 0,
+      "group": "Targeting"
+    },
+    {
+      "key": "requires_line_of_sight",
+      "label": "Requires LOS",
+      "type": "bool",
+      "default": true,
+      "group": "Targeting"
+    },
+    {
+      "key": "tags",
+      "label": "Tags",
+      "type": "array_string",
+      "group": "Tags"
+    },
+    {
+      "key": "cast_vfx_id",
+      "label": "Cast VFX ID",
+      "type": "string",
+      "group": "Visual/Audio"
+    },
+    {
+      "key": "impact_vfx_id",
+      "label": "Impact VFX ID",
+      "type": "string",
+      "group": "Visual/Audio"
+    },
+    {
+      "key": "vfx_offset",
+      "label": "VFX Offset",
+      "type": "vector3",
+      "default": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "group": "Visual/Audio"
+    },
+    {
+      "key": "cast_sfx_id",
+      "label": "Cast SFX ID",
+      "type": "string",
+      "group": "Visual/Audio"
+    },
+    {
+      "key": "impact_sfx_id",
+      "label": "Impact SFX ID",
+      "type": "string",
+      "group": "Visual/Audio"
+    },
+    {
+      "key": "animation_name",
+      "label": "Animation Name",
+      "type": "string",
+      "group": "Visual/Audio"
+    }
+  ]
+}

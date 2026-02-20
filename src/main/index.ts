@@ -148,8 +148,8 @@ ipcMain.handle("save-schema", (_e, schema: any, projectPath: string) => {
   
   const fileName = `${schema.type.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase()}.json`;
   
-  // Salva no ProjectPath/schemas
-  const schemaDir = join(projectPath, "schemas");
+  // Salva no ProjectPath/.schemas
+  const schemaDir = join(projectPath, ".schemas");
   if (!fs.existsSync(schemaDir)) {
       fs.mkdirSync(schemaDir, { recursive: true });
   }
@@ -162,7 +162,7 @@ ipcMain.handle("save-schema", (_e, schema: any, projectPath: string) => {
 ipcMain.handle("load-schemas", (_e, projectPath: string) => {
   if (!projectPath || !fs.existsSync(projectPath)) return [];
   
-  const schemaDir = join(projectPath, "schemas");
+  const schemaDir = join(projectPath, ".schemas");
   // Se a pasta schemas não existe, retornamos array vazio (ou poderíamos copiar os defaults)
   if (!fs.existsSync(schemaDir)) return [];
 
@@ -194,12 +194,12 @@ ipcMain.handle("generate-gdscript", (_e, schema: any, projectPath: string) => {
   const className = schema.type;
   const fileName = className.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase() + ".gd";
   
-  // Define onde salvar o .gd (no root ou script_templates? Por enquanto na raiz ou pasta do recurso)
-  // Vamos salvar na pasta 'src' ou 'scripts' se existir, senão na raiz
-  let targetDir = join(projectPath, "src/resources");
+  // Logic: projectPath/[schema.folder|resources]/scripts/
+  const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
+  const targetDir = join(projectPath, folder, "scripts");
+  
   if (!fs.existsSync(targetDir)) {
-      targetDir = join(projectPath, "resources"); 
-      if (!fs.existsSync(targetDir)) targetDir = projectPath;
+      fs.mkdirSync(targetDir, { recursive: true });
   }
   
   const targetPath = join(targetDir, fileName);

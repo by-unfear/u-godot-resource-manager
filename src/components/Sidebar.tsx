@@ -1,4 +1,4 @@
-import { FolderOpen, Settings, RefreshCw } from "lucide-react";
+import { FolderOpen, Settings, Settings2 } from "lucide-react";
 import { useStore } from "../store";
 import { SCHEMA_CATEGORIES, SCHEMA_MAP } from "../lib/schemas";
 import { pickDirectory } from "../lib/fs";
@@ -15,73 +15,77 @@ export function Sidebar() {
   return (
     <aside className="flex flex-col w-56 h-screen border-r border-bg-border bg-bg-panel shrink-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-bg-border">
-        <span className="text-xs font-mono text-text-muted uppercase tracking-widest">
-          Resources
-        </span>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-bg-border shrink-0">
+        <h1 className="font-bold text-sm tracking-wide text-text-muted">RESOURCES</h1>
+        <div className="flex items-center gap-1">
           <button
-            onClick={triggerRefresh}
-            title="Reescanear recursos"
-            className="text-text-muted hover:text-text-secondary transition-colors"
+            onClick={() => {
+              // Lógica de escolher pasta
+              const current = localStorage.getItem(`grm.folder.${projectPath}`) || "resources";
+              const newFolder = prompt("Caminho da pasta de recursos (relativo ao projeto):", current);
+              if (newFolder !== null) {
+                localStorage.setItem(`grm.folder.${projectPath}`, newFolder);
+                // Força um reload simples para aplicar
+                window.location.reload();
+              }
+            }}
+            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
+            title="Pasta de Recursos"
           >
-            <RefreshCw size={14} />
+            <FolderOpen size={16} />
           </button>
+          
           <button
-            onClick={handleChangeProject}
-            title={projectPath ?? ""}
-            className="text-text-muted hover:text-text-secondary transition-colors"
+            onClick={() => setEditingSchema(true)}
+            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
+            title="Editar Schemas"
           >
-            <FolderOpen size={14} />
+            <Settings size={16} />
           </button>
         </div>
       </div>
 
       {/* Categories */}
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 overflow-y-auto py-2 space-y-1">
         {Object.entries(schemas.reduce((acc, schema: Schema) => {
-          // Extrai a primeira pasta como categoria (ex: "data/player/..." -> "data")
-          // Na verdade, vamos simplificar e usar uma lógica customizada ou "Custom"
-          // Melhor: Se tiver definido em SCHEMA_CATEGORIES, usa de lá. Se não, joga em "Custom"
-          
           let category = "Custom";
-          
-          // Tenta encontrar em categorias pré-definidas
           for (const cat of SCHEMA_CATEGORIES) {
               if (cat.types.includes(schema.type)) {
                   category = cat.label;
                   break;
               }
           }
-          
           if (!acc[category]) acc[category] = [];
           acc[category].push(schema);
           return acc;
         }, {} as Record<string, Schema[]>)).map(([label, list]) => (
-          <div key={label} className="mb-1">
-            <p className="px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest text-text-muted">
+          <div key={label} className="mb-2">
+            <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted/70">
               {label}
             </p>
-            {list.map((schema) => {
-              const active = selectedType === schema.type;
-              return (
-                <button
-                  key={schema.type}
-                  onClick={() => setSelectedType(schema.type)}
-                  className={`w-full flex items-center gap-2.5 px-4 py-1.5 text-sm transition-all
-                    ${active
-                      ? "bg-bg-active text-text-primary"
-                      : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-                    }`}
-                >
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: active ? schema.color : "#3a3a48" }}
-                  />
-                  <span className="truncate">{schema.label}</span>
-                </button>
-              );
-            })}
+            <div className="space-y-0.5">
+                {list.map((schema) => {
+                  const active = selectedType === schema.type;
+                  return (
+                    <button
+                      key={schema.type}
+                      onClick={() => setSelectedType(schema.type)}
+                      className={`w-full flex items-center gap-2.5 px-4 py-1.5 text-xs font-mono transition-all
+                        ${active
+                          ? "bg-bg-active text-text-primary border-r-2"
+                          : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                        }`}
+                      style={{ borderRightColor: active ? schema.color : "transparent" }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0 opacity-80"
+                        style={{ backgroundColor: schema.color }}
+                      />
+                      <span className="truncate font-medium">{schema.label || schema.type}</span>
+                    </button>
+                  );
+                })}
+            </div>
           </div>
         ))}
       </nav>

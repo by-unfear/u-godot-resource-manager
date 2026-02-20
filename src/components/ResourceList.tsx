@@ -9,14 +9,14 @@ export function ResourceList() {
   const {
     projectPath, selectedType, selectedFile,
     setSelectedFile, resources, setResources,
-    upsertResource, removeResource, refreshKey,
+    upsertResource, removeResource, refreshKey, schemas,
   } = useStore();
 
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const schema = selectedType ? getSchema(selectedType) : null;
+  const schema = schemas.find(s => s.type === selectedType) ?? null;
   const list = selectedType ? (resources[selectedType] ?? []) : [];
 
   // Load on type change
