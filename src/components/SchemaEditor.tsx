@@ -10,10 +10,10 @@ const FIELD_TYPES = [
   "file", "image", "array_string", "relation", "array_relation"
 ];
 
-import { saveSchema, generateGDScript } from "../lib/fs";
+import { saveSchema, generateGDScript, loadSchemas } from "../lib/fs";
 
 export function SchemaEditor() {
-  const { setEditingSchema, projectPath } = useStore();
+  const { setEditingSchema, projectPath, schemas, setSchemas } = useStore();
   
   // Lista de schemas ou "Novo Schema"
   const [selectedSchemaType, setSelectedSchemaType] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function SchemaEditor() {
   const [draft, setDraft] = useState<Schema | null>(null);
 
   const handleSelectSchema = (type: string) => {
-    const original = SCHEMA_MAP[type];
+    const original = schemas.find(s => s.type === type);
     if (original) {
       setDraft(JSON.parse(JSON.stringify(original))); // Clone profundo para edição
       setSelectedSchemaType(type);
@@ -44,10 +44,15 @@ export function SchemaEditor() {
   };
 
   const handleSave = async () => {
-    if (!draft) return;
+    if (!draft || !projectPath) return;
     try {
-      const path = await saveSchema(draft);
-      alert(`Schema salvo com sucesso!\n${path}\n\nPara ver as mudanças, talvez seja necossário reiniciar o app (recarga de JSONs estáticos).`);
+      const path = await saveSchema(draft, projectPath);
+      
+      // Recarrega os schemas para atualizar a lista
+      const loaded = await loadSchemas(projectPath);
+      setSchemas(loaded);
+      
+      alert(`Schema salvo com sucesso!\n${path}`);
     } catch (e) {
       alert("Erro ao salvar schema: " + String(e));
     }
@@ -87,7 +92,7 @@ export function SchemaEditor() {
           
           <hr className="border-bg-border my-2" />
           
-          {ALL_SCHEMAS.map(s => (
+          {schemas.map(s => (
             <button
               key={s.type}
               onClick={() => handleSelectSchema(s.type)}

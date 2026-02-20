@@ -1,1 +1,16 @@
-{"type":"WorldLibraryData","label":"World Library","emoji":"🗂️","color":"#7dd3fc","folder":"resources","convention":"worlds-library.json","fields":[{"key":"world_ids","label":"World IDs","type":"array_string","hint":"IDs de WorldData"}]}
+{
+  "type": "WorldLibraryData",
+  "label": "World Library",
+  "emoji": "🗂️",
+  "color": "#7dd3fc",
+  "folder": "resources",
+  "convention": "worlds-library.json",
+  "fields": [
+    {
+      "key": "world_ids",
+      "label": "World IDs",
+      "type": "array_string",
+      "hint": "IDs de WorldData"
+    }
+  ]
+}
