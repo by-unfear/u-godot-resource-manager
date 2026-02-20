@@ -74,7 +74,9 @@ export interface AppStore {
   refreshKey: number;
   editingSchema: boolean;
   schemas: Schema[];  // Schemas carregados dinamicamente
-  setProjectPath: (path: string) => void;
+  resourceFolder: string; // Pasta padrão para exportação (.tres)
+  setResourceFolder: (folder: string) => void;
+  setProjectPath: (path: string | null) => void;
   setSchemas: (list: Schema[]) => void;
   setSelectedType: (type: string) => void;
   setSelectedFile: (path: string | null) => void;

@@ -1,4 +1,4 @@
-import type { ResourceRecord } from "../types";
+import type { ResourceRecord, Schema } from "../types";
 
 // window.api é exposto pelo preload.ts via contextBridge
 const api = (window as unknown as { api: typeof import("../../electron/preload") extends never ? never : {
@@ -12,7 +12,8 @@ const api = (window as unknown as { api: typeof import("../../electron/preload")
   buildJsonPath: (projectPath: string, folder: string, fileName: string) => string;
   saveSchema: (schema: any, projectPath: string) => Promise<string>;
   loadSchemas: (projectPath: string) => Promise<any[]>;
-  generateGDScript: (schema: any, projectPath: string) => Promise<string>;
+  generateGDScript: (schema: any, projectPath: string, resourceFolder?: string) => Promise<string>;
+  exportResource: (resource: any, schema: any, projectPath: string, resourceFolder?: string) => Promise<string>;
 }}).api;
 
 // ─── Directory ─────────────────────────────────────────────────────────────────
@@ -107,6 +108,13 @@ export async function exportTres(
   );
 }
 
+export async function exportResource(resource: any, schema: Schema, projectPath: string, resourceFolder: string = "resources"): Promise<string> {
+  return typeof api.exportResource === "function"
+    ? await api.exportResource(resource, schema, projectPath, resourceFolder)
+    // Fallback se a API não estiver exposta (ex: versões antigas do preload)
+    : Promise.reject("API exportResource not available");
+}
+
 // ─── Image Preview ────────────────────────────────────────────────────────────
 
 // No Electron, paths absolutos funcionam direto com o prefixo file://
@@ -161,8 +169,8 @@ export async function loadSchemas(projectPath: string): Promise<any[]> {
     : [];
 }
 
-export async function generateGDScript(schema: any, projectPath: string): Promise<string> {
+export async function generateGDScript(schema: any, projectPath: string, resourceFolder: string = "resources"): Promise<string> {
   return typeof api.generateGDScript === "function"
-    ? await api.generateGDScript(schema, projectPath)
+    ? await api.generateGDScript(schema, projectPath, resourceFolder)
     : Promise.reject("API generateGDScript not available");
 }

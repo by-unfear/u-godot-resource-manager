@@ -1,1 +1,0 @@
-{"type":"AbilityEffectData","label":"Ability Effect","emoji":"🎯","color":"#c084fc","folder":"resources/ability-effects","convention":"nome-ability-effect.json","fields":[{"key":"effect_id","label":"Effect ID","type":"string"},{"key":"delay","label":"Delay (s)","type":"float","default":0.0}]}

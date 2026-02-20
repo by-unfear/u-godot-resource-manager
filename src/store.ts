@@ -12,7 +12,9 @@ export const useStore = create<AppStore>()(
       refreshKey: 0,
       editingSchema: false,
       schemas: [],
+      resourceFolder: "resources",
 
+      setResourceFolder: (folder) => set({ resourceFolder: folder }),
       triggerRefresh: () => set((s) => ({ refreshKey: s.refreshKey + 1 })),
       setEditingSchema: (v) => set({ editingSchema: v, selectedType: null, selectedFile: null }),
       setSchemas: (list) => set({ schemas: list }),
@@ -41,7 +43,7 @@ export const useStore = create<AppStore>()(
     }),
     {
       name: "grm-storage",
-      partialize: (s) => ({ projectPath: s.projectPath }),
+      partialize: (s) => ({ projectPath: s.projectPath, resourceFolder: s.resourceFolder }),
     }
   )
 );

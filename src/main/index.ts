@@ -141,6 +141,51 @@ function toTresValue(key: string, value: unknown, enums: Record<string, string[]
   return String(value);
 }
 
+// ─── Export Resource (Advanced) ────────────────────────────────────────────────
+ipcMain.handle("export-resource", (_e, resource: any, schema: any, projectPath: string, resourceFolder: string = "resources") => {
+  if (!projectPath) throw new Error("Path não definido");
+  
+  const className = schema.type;
+  // Determina pasta de destino
+  const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : resourceFolder;
+  const targetDir = join(projectPath, folder);
+  
+  if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  const fileName = resource._file + ".tres";
+  const targetPath = join(targetDir, fileName);
+
+  // Calcula Enums (simples por enquanto, pegando do schema)
+  const enums: Record<string, string[]> = {};
+  if (schema.fields) {
+      for (const f of schema.fields) {
+          if (f.type === "enum" && f.options) {
+              enums[f.key] = f.options;
+          }
+      }
+  }
+
+  // Gera conteúdo .tres
+  const lines: string[] = [
+    `[gd_resource type="${className}" format=3]`,
+    "",
+    "[resource]",
+  ];
+
+  for (const [key, value] of Object.entries(resource)) {
+    if (key.startsWith("_")) continue;
+    // Ignora campos que não estão no schema? Ou salva tudo?
+    // Melhor salvar tudo que não for metadados (_)
+    lines.push(`${key} = ${toTresValue(key, value, enums)}`);
+  }
+
+  const content = lines.join("\n") + "\n";
+  fs.writeFileSync(targetPath, content, "utf-8");
+  return targetPath;
+});
+
 // ─── Schema & GDScript Generation ─────────────────────────────────────────────
 
 ipcMain.handle("save-schema", (_e, schema: any, projectPath: string) => {
@@ -188,14 +233,14 @@ ipcMain.handle("load-schemas", (_e, projectPath: string) => {
   return results;
 });
 
-ipcMain.handle("generate-gdscript", (_e, schema: any, projectPath: string) => {
+ipcMain.handle("generate-gdscript", (_e, schema: any, projectPath: string, resourceFolder: string = "resources") => {
   if (!projectPath) throw new Error("Caminho do projeto não definido.");
 
   const className = schema.type;
   const fileName = className.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase() + ".gd";
   
-  // Logic: projectPath/[schema.folder|resources]/scripts/
-  const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
+  // Logic: projectPath/[schema.folder|resourceFolder]/scripts/
+  const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : resourceFolder;
   const targetDir = join(projectPath, folder, "scripts");
   
   if (!fs.existsSync(targetDir)) {

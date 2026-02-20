@@ -1,1 +1,0 @@
-{"type":"CurrencyData","label":"Currency","emoji":"💰","color":"#fde68a","folder":"resources/economy","convention":"nome-currency.json","fields":[{"key":"currency_id","label":"Currency ID","type":"string"},{"key":"currency_name","label":"Name","type":"string"},{"key":"icon","label":"Icon","type":"image"},{"key":"max_stack","label":"Max Stack","type":"int","default":9999}]}
