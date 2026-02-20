@@ -11,6 +11,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: "#0d0d0f",
     titleBarStyle: "hiddenInset",
+    autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,

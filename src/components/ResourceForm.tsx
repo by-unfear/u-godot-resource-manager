@@ -8,9 +8,14 @@ import { FieldRenderer } from "./fields/FieldRenderer";
 import type { ResourceRecord } from "../types";
 
 export function ResourceForm() {
-  const { selectedFile, selectedType, upsertResource, projectPath, schemas } = useStore();
+  const selectedFile = useStore((s) => s.selectedFile);
+  const selectedType = useStore((s) => s.selectedType);
+  const projectPath = useStore((s) => s.projectPath);
+  const schemas = useStore((s) => s.schemas);
+  const upsertResource = useStore((s) => s.upsertResource);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportPath, setExportPath] = useState("");
 
@@ -21,16 +26,25 @@ export function ResourceForm() {
   // Load record when selectedFile changes
   useEffect(() => {
     if (!selectedFile) return;
-    loadResource(selectedFile).then((rec) => {
-      reset(rec as Record<string, unknown>);
-      // Build default export path
-      if (projectPath && schema) {
-        const name = rec._file || stripExt(basename(selectedFile));
-        const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
-        const fullPath = `${projectPath}/${folder}/${name}.tres`.replace(/\\/g, "/");
-        setExportPath(fullPath);
-      }
-    });
+    setLoading(true);
+    loadResource(selectedFile)
+      .then((rec) => {
+        reset(rec as Record<string, unknown>);
+        // Build default export path
+        if (projectPath && schema) {
+          const name = rec._file || stripExt(basename(selectedFile));
+          const folder = schema.folder ? schema.folder.replace(/^\/|\/$/g, "") : "resources";
+          const fullPath = `${projectPath}/${folder}/${name}.tres`.replace(/\\/g, "/");
+          setExportPath(fullPath);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        // Fallback or error state could be handled here
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [selectedFile]);
 
   const onSave = handleSubmit(async (data) => {
@@ -52,6 +66,14 @@ export function ResourceForm() {
   });
 
   if (!schema || !selectedFile) return null;
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center h-screen bg-bg-panel text-text-muted font-mono text-xs">
+        Carregando...
+      </div>
+    );
+  }
 
   // Group fields
   const grouped: Record<string, typeof schema.fields> = {};
