@@ -80,7 +80,7 @@ export function SchemaEditor() {
       {/* Sidebar: Lista de tipos (Estilo Sidebar.tsx) */}
       <aside className="flex flex-col w-56 h-full border-r border-bg-border bg-bg-panel shrink-0">
         {/* Header Identico ao Sidebar.tsx */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-bg-border shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-bg-border shrink-0 bg-bg-panel z-10">
           <h1 className="font-bold text-sm tracking-wide text-text-muted">SCHEMAS</h1>
           <div className="flex items-center gap-1">
             <button 
