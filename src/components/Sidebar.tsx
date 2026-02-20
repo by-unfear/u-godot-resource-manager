@@ -2,9 +2,10 @@ import { FolderOpen, Settings, RefreshCw } from "lucide-react";
 import { useStore } from "../store";
 import { SCHEMA_CATEGORIES, SCHEMA_MAP } from "../lib/schemas";
 import { pickDirectory } from "../lib/fs";
+import type { Schema } from "../types";
 
 export function Sidebar() {
-  const { selectedType, setSelectedType, setProjectPath, projectPath, triggerRefresh } = useStore();
+  const { selectedType, setSelectedType, setProjectPath, projectPath, triggerRefresh, editingSchema, setEditingSchema, schemas } = useStore();
 
   const handleChangeProject = async () => {
     const dir = await pickDirectory();
@@ -38,19 +39,35 @@ export function Sidebar() {
 
       {/* Categories */}
       <nav className="flex-1 overflow-y-auto py-2">
-        {SCHEMA_CATEGORIES.map((cat) => (
-          <div key={cat.label} className="mb-1">
+        {Object.entries(schemas.reduce((acc, schema: Schema) => {
+          // Extrai a primeira pasta como categoria (ex: "data/player/..." -> "data")
+          // Na verdade, vamos simplificar e usar uma lógica customizada ou "Custom"
+          // Melhor: Se tiver definido em SCHEMA_CATEGORIES, usa de lá. Se não, joga em "Custom"
+          
+          let category = "Custom";
+          
+          // Tenta encontrar em categorias pré-definidas
+          for (const cat of SCHEMA_CATEGORIES) {
+              if (cat.types.includes(schema.type)) {
+                  category = cat.label;
+                  break;
+              }
+          }
+          
+          if (!acc[category]) acc[category] = [];
+          acc[category].push(schema);
+          return acc;
+        }, {} as Record<string, Schema[]>)).map(([label, list]) => (
+          <div key={label} className="mb-1">
             <p className="px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest text-text-muted">
-              {cat.label}
+              {label}
             </p>
-            {cat.types.map((type) => {
-              const schema = SCHEMA_MAP[type];
-              if (!schema) return null;
-              const active = selectedType === type;
+            {list.map((schema) => {
+              const active = selectedType === schema.type;
               return (
                 <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
+                  key={schema.type}
+                  onClick={() => setSelectedType(schema.type)}
                   className={`w-full flex items-center gap-2.5 px-4 py-1.5 text-sm transition-all
                     ${active
                       ? "bg-bg-active text-text-primary"
@@ -70,10 +87,17 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-bg-border px-4 py-2">
-        <p className="text-[10px] font-mono text-text-muted truncate" title={projectPath ?? ""}>
+      <div className="border-t border-bg-border px-4 py-2 flex items-center justify-between">
+        <p className="text-[10px] font-mono text-text-muted truncate flex-1" title={projectPath ?? ""}>
           {projectPath?.split(/[\\/]/).pop() ?? "—"}
         </p>
+        <button
+          onClick={() => setEditingSchema(true)}
+          className={`text-text-muted hover:text-text-primary transition-colors ${editingSchema ? "text-blue-400" : ""}`}
+          title="Gerenciar Tipos (Schemas)"
+        >
+          <Settings size={14} />
+        </button>
       </div>
     </aside>
   );

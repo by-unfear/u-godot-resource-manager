@@ -72,9 +72,13 @@ export interface AppStore {
   selectedFile: string | null;
   resources: Record<string, ResourceRecord[]>;
   refreshKey: number;
+  editingSchema: boolean;
+  schemas: Schema[];  // Schemas carregados dinamicamente
   setProjectPath: (path: string) => void;
+  setSchemas: (list: Schema[]) => void;
   setSelectedType: (type: string) => void;
   setSelectedFile: (path: string | null) => void;
+  setEditingSchema: (v: boolean) => void;
   setResources: (type: string, list: ResourceRecord[]) => void;
   upsertResource: (record: ResourceRecord) => void;
   removeResource: (type: string, path: string) => void;

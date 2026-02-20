@@ -24,4 +24,13 @@ contextBridge.exposeInMainWorld("api", {
 
   exportTres: (json: string, type: string, output: string, enums: string) =>
     ipcRenderer.invoke("export-tres", json, type, output, enums),
+
+  saveSchema: (schema: any, projectPath: string) =>
+    ipcRenderer.invoke("save-schema", schema, projectPath),
+
+  loadSchemas: (projectPath: string) =>
+    ipcRenderer.invoke("load-schemas", projectPath),
+
+  generateGDScript: (schema: any, projectPath: string) =>
+    ipcRenderer.invoke("generate-gdscript", schema, projectPath),
 });

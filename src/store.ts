@@ -10,8 +10,12 @@ export const useStore = create<AppStore>()(
       selectedFile: null,
       resources: {},
       refreshKey: 0,
+      editingSchema: false,
+      schemas: [],
 
       triggerRefresh: () => set((s) => ({ refreshKey: s.refreshKey + 1 })),
+      setEditingSchema: (v) => set({ editingSchema: v, selectedType: null, selectedFile: null }),
+      setSchemas: (list) => set({ schemas: list }),
       setProjectPath: (path) => set({ projectPath: path, resources: {} }),
       setSelectedType: (type) => set({ selectedType: type, selectedFile: null }),
       setSelectedFile: (path) => set({ selectedFile: path }),

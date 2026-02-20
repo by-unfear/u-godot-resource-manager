@@ -4,9 +4,27 @@ import { Sidebar } from "./components/Sidebar";
 import { ResourceList } from "./components/ResourceList";
 import { ResourceForm } from "./components/ResourceForm";
 import { Setup } from "./components/Setup";
+import { SchemaEditor } from "./components/SchemaEditor";
+
+import { loadSchemas } from "./lib/fs";
+import { ALL_SCHEMAS } from "./lib/schemas";
 
 export default function App() {
-  const { projectPath, selectedType, selectedFile } = useStore();
+  const { projectPath, selectedType, selectedFile, editingSchema, setSchemas } = useStore();
+
+
+  // Load schemas on startup or project switch
+  useEffect(() => {
+    if (projectPath) {
+        loadSchemas(projectPath).then(found => {
+            if (found.length > 0) {
+                setSchemas(found);
+            } else {
+                setSchemas(ALL_SCHEMAS);
+            }
+        });
+    }
+  }, [projectPath]);
 
   // Drag-over protection (prevents browser from opening files)
   useEffect(() => {
@@ -20,6 +38,10 @@ export default function App() {
   }, []);
 
   if (!projectPath) return <Setup />;
+
+  if (editingSchema) {
+    return <SchemaEditor />;
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#0d0d0f]">

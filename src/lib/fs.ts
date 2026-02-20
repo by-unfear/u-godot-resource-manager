@@ -9,7 +9,10 @@ const api = (window as unknown as { api: typeof import("../../electron/preload")
   pathExists: (path: string) => Promise<boolean>;
   pickDirectory: () => Promise<string | null>;
   pickFile: (filters: { name: string; extensions: string[] }[]) => Promise<string | null>;
-  exportTres: (json: string, type: string, output: string, enums: string) => Promise<void>;
+  buildJsonPath: (projectPath: string, folder: string, fileName: string) => string;
+  saveSchema: (schema: any, projectPath: string) => Promise<string>;
+  loadSchemas: (projectPath: string) => Promise<any[]>;
+  generateGDScript: (schema: any, projectPath: string) => Promise<string>;
 }}).api;
 
 // ─── Directory ─────────────────────────────────────────────────────────────────
@@ -142,4 +145,24 @@ export function buildJsonPath(
   const sep = projectPath.includes("\\") ? "\\" : "/";
   const clean = fileName.endsWith(".json") ? fileName : `${fileName}.json`;
   return [projectPath, folder, clean].join(sep);
+}
+
+// ─── Schema Export ─────────────────────────────────────────────────────────────
+
+export async function saveSchema(schema: any, projectPath: string): Promise<string> {
+  return typeof api.saveSchema === "function" 
+    ? await api.saveSchema(schema, projectPath)
+    : Promise.reject("API saveSchema not available");
+}
+
+export async function loadSchemas(projectPath: string): Promise<any[]> {
+  return typeof api.loadSchemas === "function"
+    ? await api.loadSchemas(projectPath)
+    : [];
+}
+
+export async function generateGDScript(schema: any, projectPath: string): Promise<string> {
+  return typeof api.generateGDScript === "function"
+    ? await api.generateGDScript(schema, projectPath)
+    : Promise.reject("API generateGDScript not available");
 }

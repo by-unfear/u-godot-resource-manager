@@ -1,0 +1,21 @@
+{
+  "type": "mapaDora_de",
+  "label": "New Resource",
+  "emoji": "💀",
+  "color": "#ff0000",
+  "folder": "data/nogo",
+  "convention": "snake_case",
+  "fields": [
+    {
+      "key": "id",
+      "label": "outro",
+      "type": "string"
+    },
+    {
+      "key": "status",
+      "label": "atividade",
+      "type": "bool",
+      "group": "aaa"
+    }
+  ]
+}
