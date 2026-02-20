@@ -1,0 +1,1 @@
+{"type":"AbilityLibraryData","label":"Ability Library","emoji":"📚","color":"#818cf8","folder":"resources/libraries","convention":"abilities-library.json","fields":[{"key":"ability_ids","label":"Ability IDs","type":"array_string","hint":"IDs de AbilityData"}]}

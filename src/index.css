@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #0d0d0f;
+  color: #e8e6e0;
+  font-family: 'Syne', sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+input, textarea, select {
+  user-select: text;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a48; }
+
+/* Custom focus ring */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.4);
+}
+
+/* Animated badge pulse */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

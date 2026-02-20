@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+dist/
+dist-electron/
+out/
+.pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.lnk
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build outputs
+*.exe
+*.exe~
+*.zip
+*.tar.gz
+*.dmg
+*.app
+*.installer.exe
+
+# TypeScript/Vite/Electron
+.tsbuildinfo
+.vite/
+.eslintcache
+
+# Project specific
+build_output.txt
+dev_log.txt

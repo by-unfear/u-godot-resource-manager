@@ -1,0 +1,1 @@
+{"type":"WorldSystemsRegistryData","label":"Systems Registry","emoji":"📋","color":"#64748b","folder":"resources","convention":"systems-registry.json","fields":[{"key":"mandatory_systems","label":"Mandatory Systems","type":"inner_array","inner_label":"System","inner_fields":[{"key":"scene_path","label":"System Scene","type":"file","filter":"*.tscn"}]}]}
