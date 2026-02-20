@@ -14,6 +14,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,
+      webSecurity: false,
     },
   });
 
@@ -34,21 +35,28 @@ app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) creat
 ipcMain.handle("walk-dir", (_e, root: string, ext: string) => {
   const results: string[] = [];
   const clean = ext.replace(/^\./, "");
-  function walk(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    for (const entry of readdirSync(dir)) {
-      const full = join(dir, entry);
-      try {
-        const stat = statSync(full);
-        if (stat.isDirectory()) {
-          walk(full);
-        } else if (entry.endsWith(`.${clean}`)) {
-          results.push(full);
-        }
-      } catch { /* ignora arquivos inacessíveis */ }
-    }
+  const stack = [root];
+  while (stack.length > 0) {
+    const dir = stack.pop()!;
+    if (!fs.existsSync(dir)) continue;
+
+    try {
+      const entries = readdirSync(dir);
+      for (const entry of entries) {
+        if (entry.startsWith(".") || entry === "node_modules") continue;
+        
+        const full = join(dir, entry);
+        try {
+          const stat = statSync(full);
+          if (stat.isDirectory()) {
+            stack.push(full);
+          } else if (entry.endsWith(`.${clean}`)) {
+            results.push(full);
+          }
+        } catch { /* erro ao ler stat */ }
+      }
+    } catch { /* erro ao ler dir */ }
   }
-  walk(root);
   return results.sort();
 });
 

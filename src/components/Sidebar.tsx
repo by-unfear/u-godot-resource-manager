@@ -1,10 +1,10 @@
-import { FolderOpen, Settings } from "lucide-react";
+import { FolderOpen, Settings, RefreshCw } from "lucide-react";
 import { useStore } from "../store";
 import { SCHEMA_CATEGORIES, SCHEMA_MAP } from "../lib/schemas";
 import { pickDirectory } from "../lib/fs";
 
 export function Sidebar() {
-  const { selectedType, setSelectedType, setProjectPath, projectPath } = useStore();
+  const { selectedType, setSelectedType, setProjectPath, projectPath, triggerRefresh } = useStore();
 
   const handleChangeProject = async () => {
     const dir = await pickDirectory();
@@ -18,13 +18,22 @@ export function Sidebar() {
         <span className="text-xs font-mono text-text-muted uppercase tracking-widest">
           Resources
         </span>
-        <button
-          onClick={handleChangeProject}
-          title={projectPath ?? ""}
-          className="text-text-muted hover:text-text-secondary transition-colors"
-        >
-          <FolderOpen size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={triggerRefresh}
+            title="Reescanear recursos"
+            className="text-text-muted hover:text-text-secondary transition-colors"
+          >
+            <RefreshCw size={14} />
+          </button>
+          <button
+            onClick={handleChangeProject}
+            title={projectPath ?? ""}
+            className="text-text-muted hover:text-text-secondary transition-colors"
+          >
+            <FolderOpen size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Categories */}

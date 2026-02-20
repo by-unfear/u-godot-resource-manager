@@ -70,11 +70,13 @@ export interface AppStore {
   projectPath: string | null;
   selectedType: string | null;
   selectedFile: string | null;
-  resources: Record<string, ResourceRecord[]>; // type → list
+  resources: Record<string, ResourceRecord[]>;
+  refreshKey: number;
   setProjectPath: (path: string) => void;
   setSelectedType: (type: string) => void;
   setSelectedFile: (path: string | null) => void;
   setResources: (type: string, list: ResourceRecord[]) => void;
   upsertResource: (record: ResourceRecord) => void;
   removeResource: (type: string, path: string) => void;
+  triggerRefresh: () => void;
 }

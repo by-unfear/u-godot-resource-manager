@@ -48,21 +48,44 @@ export async function pathExists(path: string): Promise<boolean> {
 export async function loadAllOfType(
   projectPath: string,
   typeName: string,
-  folder: string
+  _folder?: string
 ): Promise<ResourceRecord[]> {
-  const dir = `${projectPath}/${folder}`;
-  const exists = await pathExists(dir);
+  // Agora escaneia recursivamente a partir da RAIZ do projeto
+  // A pasta definida no schema (_folder) será usada apenas como sugestão para NOVOS arquivos
+  const exists = await pathExists(projectPath);
   if (!exists) return [];
 
-  const files = await walkDir(dir, "json");
+  const files = await walkDir(projectPath, "json");
   const records: ResourceRecord[] = [];
+  
   for (const file of files) {
     try {
       const rec = await loadResource(file);
-      if (rec._type === typeName) records.push(rec);
-    } catch { /* arquivo corrompido */ }
+      if (rec._type === typeName) {
+        // Atualiza o _path caso tenha movido o arquivo externamente
+        if (rec._path !== file) rec._path = file;
+        records.push(rec);
+      }
+    } catch { /* arquivo corrompido ou JSON inválido */ }
   }
   return records;
+}
+
+export function absoluteToRes(absolutePath: string, projectPath: string | null): string {
+  if (!projectPath) return absolutePath;
+  
+  // Normaliza barras para /
+  const abs = absolutePath.replace(/\\/g, "/");
+  const root = projectPath.replace(/\\/g, "/");
+  
+  if (abs.startsWith(root)) {
+    // Remove a raiz e adiciona res://
+    let rel = abs.substring(root.length);
+    if (rel.startsWith("/")) rel = rel.substring(1);
+    return `res://${rel}`;
+  }
+  
+  return absolutePath; // Fora do projeto
 }
 
 // ─── .tres Export ──────────────────────────────────────────────────────────────
@@ -84,10 +107,21 @@ export async function exportTres(
 // ─── Image Preview ────────────────────────────────────────────────────────────
 
 // No Electron, paths absolutos funcionam direto com o prefixo file://
-export function toImageSrc(absolutePath: string): string {
-  return absolutePath.startsWith("file://")
-    ? absolutePath
-    : `file:///${absolutePath.replace(/\\/g, "/")}`;
+export function toImageSrc(path: string, projectPath?: string | null): string {
+  // Converter tudo para barras normais primeiro
+  let abs = path.replace(/\\/g, "/");
+
+  if (path.startsWith("res://") && projectPath) {
+    const rel = path.substring(6);
+    // Concatena e normaliza barras duplas
+    const rawAbs = `${projectPath}/${rel}`.replace(/\\/g, "/").replace(/\/+/g, "/");
+    return `file:///${encodeURI(rawAbs)}`;
+  }
+
+  // Se já for file:// retorna, senão assume absoluto
+  return abs.startsWith("file://")
+    ? abs
+    : `file:///${encodeURI(abs)}`;
 }
 
 // ─── Path Helpers ──────────────────────────────────────────────────────────────

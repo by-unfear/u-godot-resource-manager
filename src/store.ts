@@ -9,7 +9,9 @@ export const useStore = create<AppStore>()(
       selectedType: null,
       selectedFile: null,
       resources: {},
+      refreshKey: 0,
 
+      triggerRefresh: () => set((s) => ({ refreshKey: s.refreshKey + 1 })),
       setProjectPath: (path) => set({ projectPath: path, resources: {} }),
       setSelectedType: (type) => set({ selectedType: type, selectedFile: null }),
       setSelectedFile: (path) => set({ selectedFile: path }),

@@ -9,7 +9,7 @@ export function ResourceList() {
   const {
     projectPath, selectedType, selectedFile,
     setSelectedFile, resources, setResources,
-    upsertResource, removeResource,
+    upsertResource, removeResource, refreshKey,
   } = useStore();
 
   const [newName, setNewName] = useState("");
@@ -26,7 +26,7 @@ export function ResourceList() {
     loadAllOfType(projectPath, selectedType, schema.folder)
       .then((recs) => setResources(selectedType, recs))
       .finally(() => setLoading(false));
-  }, [selectedType, projectPath]);
+  }, [selectedType, projectPath, refreshKey]);
 
   const handleCreate = async () => {
     if (!schema || !projectPath || !newName.trim()) return;
