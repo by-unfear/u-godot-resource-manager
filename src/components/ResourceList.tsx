@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2, FileJson } from "lucide-react";
+import { Plus, Trash2, FileJson, X } from "lucide-react";
 import { useStore } from "../store";
 import { getSchema } from "../lib/schemas";
 import { loadAllOfType, deleteResource, saveResource, basename, stripExt } from "../lib/fs";
@@ -90,8 +90,16 @@ export function ResourceList() {
             <button
               onClick={handleCreate}
               className="px-2 py-1 rounded bg-bg-border text-text-primary text-xs hover:bg-bg-hover"
+              title="Criar"
             >
               ✓
+            </button>
+            <button
+              onClick={() => { setCreating(false); setNewName(""); }}
+              className="px-2 py-1 rounded text-text-muted hover:text-text-primary transition-colors"
+              title="Cancelar"
+            >
+              <X size={14} />
             </button>
           </div>
           <p className="text-[10px] text-text-muted font-mono mt-1">
