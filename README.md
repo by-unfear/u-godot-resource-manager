@@ -1,94 +1,105 @@
-# Godot Resource Manager
+# Godot Resource Manager (GRM)
 
-Editor desktop (Electron + Vite + React) para criar e gerenciar os `.json` de dados do seu projeto Godot.
+O **Godot Resource Manager** é uma ferramenta desktop poderosa, construída com Electron e React, projetada para simplificar a criação, edição e gerenciamento de arquivos de dados (JSON) e recursos do Godot Engine. Ele oferece uma interface amigável para carregar schemas dinâmicos, editar propriedades e exportar automaticamente para `.tres` e `.gd`.
 
-## Pré-requisitos
+---
+
+## ✨ Principais Funcionalidades
+
+- **Gerenciamento de Schemas Dinâmicos**: Defina estruturas de dados (schemas) em JSON sem precisar recompilar a ferramenta.
+- **Edição Visual de Recursos**: Interface intuitiva para editar propriedades com suporte a diversos tipos de dados (String, Int, Float, Color, Vector3, File, etc.).
+- **Exportação Automática**: Converta seus dados JSON para recursos nativos do Godot (`.tres`) e gere scripts GDScript (`.gd`) automaticamente.
+- **Organização Flexível**: Escolha pastas de destino personalizadas para seus recursos.
+- **Integração com Godot**: Trabalhe diretamente na pasta do seu projeto.
+
+---
+
+## 🚀 Começando
+
+### 1. Abrindo seu Projeto
+
+Ao iniciar o aplicativo, selecione a pasta raiz do seu projeto Godot. Isso permite que o GRM escaneie e gerencie os arquivos no contexto correto.
+
+![Abrir Projeto](doc/image-a.png)
+
+### 2. Criando Schemas
+
+Defina os tipos de dados que seu jogo precisa (Inimigos, Itens, Habilidades) através do editor de Schemas. Você pode configurar campos, tipos, valores padrão e ícones.
+
+![Criar Schemas](doc/image-b.png)
+
+### 3. Editando Recursos
+
+Com os schemas definidos, crie e edite os recursos do jogo. A interface gera formulários baseados nos seus schemas, facilitando o preenchimento de dados complexos.
+
+![Editar Recursos](doc/image-c.png)
+
+---
+
+## 🛠️ Instalação e Execução
+
+### Pré-requisitos
 
 - [Node.js](https://nodejs.org/) 18+
 - npm 9+
 
-## Instalação
+### Instalação
 
-```cmd
+Clone o repositório e instale as dependências:
+
+```bash
 npm install
 ```
 
-## Desenvolvimento
+### Desenvolvimento
 
-```cmd
+Para rodar em modo de desenvolvimento com hot-reload:
+
+```bash
 npm run dev
 ```
 
-## Build
+### Build
 
-```cmd
-npm run build
+Para gerar o executável (.exe) da aplicação:
+
+```bash
+npm run dist
 ```
+
+O arquivo executável será gerado na pasta `dist/`.
 
 ---
 
-## Estrutura do projeto
+## 📦 Estrutura de Arquivos
 
-```
-electron/
-  main.ts       → processo principal, handlers de arquivo e dialog
-  preload.ts    → expõe API para o renderer via contextBridge
+A ferramenta organiza os dados da seguinte forma no seu projeto Godot:
 
-src/
-  lib/
-    fs.ts       → funções de arquivo (usa window.api do preload)
-    schemas.ts  → carrega e indexa todos os schemas
-    defaults.ts → gera record padrão a partir do schema
-  schemas/      → 26 arquivos JSON, um por resource
-  components/   → React UI
-  types.ts      → tipos compartilhados
-  store.ts      → estado global (Zustand)
-```
+- **.schemas/**: Pasta oculta na raiz do projeto onde ficam as definições de schemas (`.json`) e os dados brutos (`data/`).
+- **resources/** (ou customizado): Pasta onde os arquivos `.tres` e scripts `.gd` são exportados para uso no Godot.
 
-## Como adicionar um novo resource
+---
 
-1. Crie `src/schemas/meu_resource.json`
-2. Importe em `src/lib/schemas.ts`
-3. Adicione na categoria em `SCHEMA_CATEGORIES`
-4. Crie o `.gd` correspondente no Godot
+## 📝 Formato do Schema
 
-## Formato do schema
+Exemplo de um arquivo de definição de schema (`.json`):
 
-```jsonc
+```json
 {
-  "type": "MeuData",
-  "label": "Meu Resource",
-  "emoji": "⭐",
-  "color": "#ff6b6b",
-  "folder": "resources/meu",
-  "convention": "nome-meu.json",
+  "type": "EnemyData",
+  "label": "Enemy",
+  "emoji": "👾",
+  "color": "#e11d48",
+  "folder": "resources/enemies",
   "fields": [
-    { "key": "nome", "label": "Nome", "type": "string" },
-    { "key": "valor", "label": "Valor", "type": "float", "default": 1.0 },
-    { "key": "tipo", "label": "Tipo", "type": "enum", "options": ["A", "B"] },
-    { "key": "cena", "label": "Cena", "type": "file", "filter": "*.tscn" },
-    { "key": "icon", "label": "Ícone", "type": "image" },
-    { "key": "tags", "label": "Tags", "type": "array_string" },
-    { "key": "speed", "label": "Speed", "type": "float", "group": "Movement" }
+    { "key": "name", "label": "Name", "type": "string" },
+    { "key": "health", "label": "Max Health", "type": "int", "default": 100 },
+    { "key": "speed", "label": "Speed", "type": "float", "default": 5.0 },
+    { "key": "sprite", "label": "Sprite", "type": "image" }
   ]
 }
 ```
 
-## Tipos de campo disponíveis
+---
 
-| type | Descrição |
-|---|---|
-| `string` | Input de texto |
-| `text` | Textarea |
-| `int` | Número inteiro |
-| `float` | Número decimal |
-| `bool` | Checkbox |
-| `enum` | Select com opções fixas |
-| `file` | Path com file picker nativo (filtrado) |
-| `image` | Path com preview da imagem |
-| `color` | Color picker → `{r,g,b,a}` |
-| `vector3` | Três inputs XYZ |
-| `array_string` | Lista de strings editável |
-| `relation` | Dropdown de IDs de outro resource |
-| `inner_array` | Array de sub-objetos (Entry, Line, etc.) |
-| `dictionary` | Textarea JSON livre |
+*Desenvolvido para agilizar o fluxo de trabalho de dados no Godot Engine.*
